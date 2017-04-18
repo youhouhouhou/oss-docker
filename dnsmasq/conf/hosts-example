@@ -1,0 +1,6 @@
+
+10.0.0.100 fileserver.internal
+10.0.0.100 mirror.docker.internal
+10.0.0.100 nexus.internal
+10.0.0.100 nexus3.internal
+10.0.0.100 registry.docker.internal

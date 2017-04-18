@@ -1,0 +1,41 @@
+
+# 这个镜像简单至极, 默认就是运行了dnsmasq -k.
+# 即强制让dnsmasq运行在前端. 然后dnsmasq没有任何特殊的配置, 都需要启动过的时候手工指定.
+#
+# --log-facility=- 选项 将日志输出到控制台
+# mkdir -p conf
+# echo '${ip} ${hostname}' > conf/hosts
+# 在hosts中, 新增一条记录: echo '${ip} ${hostname}' >> conf/hosts
+# 向容器发送信号, 使其重新加载文件: docker kill -s HUP ${container}
+#
+# --addn-hosts=<file>
+# Example: hosts
+#${ip} fileserver.internal
+#${ip} mirror.docker.internal
+#${ip} nexus.internal
+#${ip} nexus3.internal
+#${ip} registry.docker.internal
+#
+# --resolv-file=<file>
+# Example: resolv.conf
+#nameserver ${ip}
+#nameserver ${ip}
+
+version: '2.1'
+services:
+  dnsmasq:
+    image: andyshinn/dnsmasq:latest
+    restart: unless-stopped
+    command: ["--addn-hosts=/media/hosts", "-q", "--log-facility=-"]
+    container_name: ${NEXUS_HOSTNAME:-dnsmasq.internal}
+    hostname: ${NEXUS_HOSTNAME:-dnsmasq.internal}
+    ports:
+    - "53:53/tcp"
+    - "53:53/udp"
+    volumes:
+    - ./conf:/media
+    cap_add:
+    - NET_ADMIN
+    #dns:
+    #- 8.8.8.8
+    network_mode: "host"

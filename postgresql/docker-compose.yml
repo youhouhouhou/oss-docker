@@ -1,0 +1,40 @@
+
+# see: https://hub.docker.com/_/postgres/
+
+# backup: docker exec -t local-postgresql pg_dumpall -c -U postgres > dump_`date +%d-%m-%Y"_"%H_%M_%S`.sql
+# backup: docker exec -t local-postgresql pg_dumpall -c -U postgres | gzip > dump_`date +%d-%m-%Y"_"%H_%M_%S`.sql.gz
+# restore: cat your_dump.sql | docker exec -i local-postgresql psql -U postgres
+
+# create database, see: https://github.com/sameersbn/docker-postgresql/issues/58
+# docker exec -it local-postgresql psql -U postgres -c "CREATE DATABASE sonar;"
+# docker exec -it local-postgresql psql -U postgres -c "CREATE USER sonar SUPERUSER PASSWORD 'sonar';"
+# docker exec -it local-postgresql psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE sonar TO sonar;"
+
+version: '2.1'
+services:
+  postgresql:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${DOCKER_REGISTRY:-registry.docker.local}/postgres:9.6.1-alpine
+    restart: always
+    container_name: ${POSTGRESQL_HOSTNAME:-local-postgresql}
+    hostname: ${POSTGRESQL_HOSTNAME:-local-postgresql}
+    environment:
+    - POSTGRES_USER=${POSTGRES_USER:-user}
+    - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-user_pass}
+    ports:
+    - "5432:5432"
+    volumes:
+    - postgresql:/var/lib/postgresql
+    # This needs explicit mapping due to https://github.com/docker-library/postgres/blob/4e48e3228a30763913ece952c611e5e9b95c8759/Dockerfile.template#L52
+    - postgresql_data:/var/lib/postgresql/data
+
+volumes:
+  postgresql:
+  postgresql_data:
+
+networks:
+  default:
+    external:
+      name: oss-network

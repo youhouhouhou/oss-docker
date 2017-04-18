@@ -1,0 +1,4 @@
+
+## Start up
+
+    docker run -d --name="portainer.local" -p 9000:9000 -v "/var/run/docker.sock:/var/run/docker.sock" portainer/portainer:1.12.1

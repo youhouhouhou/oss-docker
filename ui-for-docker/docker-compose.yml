@@ -1,0 +1,17 @@
+
+version: '2.1'
+services:
+  ui-for-docker:
+    image: uifd/ui-for-docker:0.11.0
+    restart: always
+    container_name: ${UI_FOR_DOCKER_HOSTNAME:-local-ui-for-docker}
+    hostname: ${UI_FOR_DOCKER_HOSTNAME:-local-ui-for-docker}
+    ports:
+    - "19000:9000"
+    privileged: true
+    volumes:
+    - ui-for-docker-volume:/data
+    - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  ui-for-docker-volume: {}

@@ -1,0 +1,54 @@
+
+# see: https://github.com/osixia/docker-openldap
+
+# docker exec local-ldap ldapsearch -x -h local-ldap -b dc=example,dc=com -D "cn=admin,dc=example,dc=com" -w admin_pass
+# open https://local-ldapadmin:6443
+# Login DN: cn=admin,dc=example,dc=com
+# password: admin_pass
+
+version: '2.1'
+services:
+  ldap:
+    build:
+      context: openldap
+      dockerfile: Dockerfile
+    image: ${DOCKER_REGISTRY:-registry.docker.local}/openldap:1.1.7
+    restart: always
+    container_name: ${LDAP_HOSTNAME:-local-ldap}
+    hostname: ldap.${LDAP_DOMAIN:-example.com}
+    ports:
+    - "389:389/tcp"
+    - "636:636/tcp"
+    volumes:
+    - ldap-volume:/var/lib/ldap
+    - ldap-volume:/etc/ldap/slapd.d
+    environment:
+    #- LDAP_TLS=false
+    - LDAP_ORGANISATION=${LDAP_ORGANISATION:-Example Inc.}
+    - LDAP_DOMAIN=${LDAP_DOMAIN:-example.com}
+    - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD:-admin_pass}
+
+  ldap-admin:
+    build:
+      context: phpldapadmin
+      dockerfile: Dockerfile
+    image: ${DOCKER_REGISTRY:-registry.docker.local}/phpldapadmin:0.6.11
+    restart: always
+    container_name: ${LDAPADMIN_HOSTNAME:-local-phpldapadmin}
+    hostname: ${LDAPADMIN_HOSTNAME:-local-phpldapadmin}
+    links:
+    - ldap:${LDAP_HOSTNAME:-local-ldap}
+    ports:
+    - "6443:443/tcp"
+    environment:
+    #- PHPLDAPADMIN_LDAP_CLIENT_TLS=false
+    - PHPLDAPADMIN_LDAP_HOSTS=${LDAP_HOSTNAME:-local-ldap}
+    - PHPLDAPADMIN_SERVER_ADMIN=admin@${LDAP_DOMAIN:-example.com}
+
+volumes:
+  ldap-volume: {}
+
+networks:
+  default:
+    external:
+      name: oss-network

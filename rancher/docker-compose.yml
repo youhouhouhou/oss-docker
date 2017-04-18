@@ -1,0 +1,18 @@
+
+version: '2.1'
+services:
+  rancher-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${DOCKER_REGISTRY:-registry.docker.local}/rancher-server:v1.5.2
+    restart: unless-stopped
+    container_name: ${RANCHER_SERVER_HOSTNAME:-local-rancher-server}
+    hostname: ${RANCHER_SERVER_HOSTNAME:-local-rancher-server}
+    ports:
+    - "18080:8080"
+
+networks:
+  default:
+    external:
+      name: oss-network
