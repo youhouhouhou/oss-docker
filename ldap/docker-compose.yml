@@ -12,7 +12,7 @@ services:
     build:
       context: openldap
       dockerfile: Dockerfile
-    image: ${DOCKER_REGISTRY:-registry.docker.local}/openldap:1.1.7
+    image: home1oss/openldap:1.1.7
     restart: always
     container_name: ${LDAP_HOSTNAME:-local-ldap}
     hostname: ldap.${LDAP_DOMAIN:-example.com}
